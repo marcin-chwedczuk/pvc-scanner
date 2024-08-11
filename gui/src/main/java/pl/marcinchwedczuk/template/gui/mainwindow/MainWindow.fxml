@@ -4,7 +4,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<VBox minHeight="100" minWidth="300"
+<?import javafx.scene.shape.Sphere?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.shape.Cylinder?>
+<?import javafx.scene.transform.Translate?>
+<?import javafx.scene.transform.Rotate?>
+<?import javafx.scene.paint.PhongMaterial?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.StackPane?>
+<VBox minHeight="640" minWidth="800"
       styleClass="mainWindow" stylesheets="@MainWindow.css"
       xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/"
       fx:controller="pl.marcinchwedczuk.template.gui.mainwindow.MainWindow"
@@ -12,5 +20,7 @@
     <children>
         <Button onAction="#clicked">Click me!</Button>
         <Label fx:id="label" />
+        <Slider fx:id="rotateSlider" min="0" max="360" />
+        <StackPane fx:id="display3D" />
     </children>
 </VBox>
