@@ -6,24 +6,25 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
-import javafx.scene.AmbientLight;
-import javafx.scene.Group;
-import javafx.scene.PointLight;
-import javafx.scene.Scene;
+import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import pl.marcinchwedczuk.template.domain.Util;
 import pl.marcinchwedczuk.template.gui.mainwindow.PointsArray2D.PointRef;
 import pl.marcinchwedczuk.template.gui.mainwindow.TextureArray2D.TextureRef;
 
 import java.io.IOException;
+import java.io.SerializablePermission;
 import java.net.URL;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -65,10 +66,9 @@ public class MainWindow implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         label.setText(Util.quote("Hello, world!"));
 
-        Group g = new Group();
         TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
 
-        final int maxH = 5;
+        final int maxH = 7;
         final int maxA = 12;
 
         PointsArray2D points = new PointsArray2D(maxA + 1, maxH);
@@ -82,7 +82,7 @@ public class MainWindow implements Initializable {
             for (int angle = 0; angle < maxA; angle += 1) {
                 PointRef pointRef = points.at(angle, h);
 
-                float radius = radiusR + r.nextFloat() * radiusR / 5.0f;
+                float radius = (radiusR + r.nextFloat() * radiusR / 5.0f) / (float)Math.log(h + 2);
 
                 // points wounded in CCW fashion
                 pointRef.setX(radius * (float)Math.cos(Math.toRadians(-angle*360.0f/maxA)));
@@ -97,14 +97,6 @@ public class MainWindow implements Initializable {
                 normalRef.setY(0);
                 normalRef.setZ((float)Math.sin(Math.toRadians(-angle*360.0f/maxA)));
                 */
-
-                Sphere marker = new Sphere(10.0);
-                Color color = Color.hsb(angle * 360.0f / maxA, 1.0, 1.0);
-                marker.setMaterial(new PhongMaterial(color));
-                marker.setTranslateX(pointRef.getX());
-                marker.setTranslateY(pointRef.getY());
-                marker.setTranslateZ(pointRef.getZ());
-                g.getChildren().add(marker);
 
                 TextureRef textureRef = texture.at(angle, h);
                 textureRef.setX(1.0f * angle / maxA);
@@ -165,24 +157,48 @@ public class MainWindow implements Initializable {
 
         MeshView mv = new MeshView(mesh);
         // mv.setDrawMode(DrawMode.LINE);
-        // mv.setCullFace(CullFace.NONE);
+        mv.setCullFace(CullFace.NONE);
         Image diffuseMap = new Image(MainWindow.class.getResource("abc.jpg").toExternalForm());
         PhongMaterial earthMaterial = new PhongMaterial();
         // earthMaterial.setDiffuseMap(diffuseMap);
         earthMaterial.setDiffuseColor(Color.RED);
         mv.setMaterial(earthMaterial);
 
-        mv.setRotationAxis(new Point3D(1, 1, 0));
-        mv.rotateProperty().bind(rotateSlider.valueProperty());
-        // display3D.getChildren().add(new AmbientLight(Color.GRAY));
-        PointLight pl = new PointLight(Color.WHITE);
-        pl.setTranslateZ(500);
-        //display3D.getChildren().add(pl);
 
-        g.setRotationAxis(mv.getRotationAxis());
-        g.rotateProperty().bind(rotateSlider.valueProperty());
-        display3D.getChildren().add(g);
-        display3D.getChildren().add(mv);
+        AxisMarker am = new AxisMarker();
+        am.scale(15);
+
+        Group model = new Group();
+        model.getChildren().add(new Box(600, 5, 600));
+        model.getChildren().add(mv);
+        model.getChildren().add(am);
+        model.getTransforms().add(new Scale(1, -1, 1));
+
+
+        Group sceneGroup = new Group();
+        Rotate rtx = new Rotate(0, new Point3D(1, 1, 1));
+        rtx.angleProperty().bind(rotateSlider.valueProperty());
+        sceneGroup.getTransforms().add(rtx);
+        sceneGroup.getChildren().addAll(model, am);
+
+        SubScene d3Scene = new SubScene(sceneGroup, 800, 640, true, SceneAntialiasing.DISABLED);
+
+        // default at (0, 0, 0) looking at -z.
+        var camera = new PerspectiveCamera();
+        d3Scene.setCamera(camera);
+
+        // Make (0,0,0) center in camera view
+        camera.setTranslateX(-d3Scene.getWidth() / 2);
+        camera.setTranslateY(-d3Scene.getHeight() / 2);
+        camera.setTranslateZ(-500);
+
+        // Set cliping rectangle
+        camera.setNearClip(1.0);
+        camera.setFarClip(10000.0);
+
+        // camera.setTranslateZ(-800);
+        d3Scene.setFill(Color.GRAY);
+        display3D.getChildren().add(d3Scene);
     }
 
     @FXML
