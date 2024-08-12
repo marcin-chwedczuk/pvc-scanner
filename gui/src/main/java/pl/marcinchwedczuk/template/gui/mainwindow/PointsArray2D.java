@@ -14,6 +14,19 @@ public class PointsArray2D {
         this.data = new float[maxWidth * maxHeight * 3];
     }
 
+    public PointsArray2D(int maxWidth, int maxHeight, float[] data) {
+        if (maxWidth <= 0) throw new IllegalArgumentException();
+        if (maxHeight <= 0) throw new IllegalArgumentException();
+
+        int expectedLength = 3 * maxHeight * maxWidth;
+        if (data.length != expectedLength)
+            throw new IllegalArgumentException(String.format("expecting data length to be %d but was %d", expectedLength, data.length));
+
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.data = data;
+    }
+
     private int rawIndexOf(int w, int h) {
         if (w < 0 || w >= maxWidth)
             throw new IndexOutOfBoundsException("w");
@@ -33,7 +46,7 @@ public class PointsArray2D {
             throw new IndexOutOfBoundsException("w");
 
         if (h < 0 || h >= maxHeight)
-            throw new IndexOutOfBoundsException("h");
+            throw new IndexOutOfBoundsException(String.format("index should be between [0..%d] but was %d", maxHeight, h));
 
         return (maxWidth * h + w);
     }

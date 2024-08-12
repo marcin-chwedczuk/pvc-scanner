@@ -142,11 +142,7 @@ public class MainWindow implements Initializable {
             }
         }
 
-        System.out.println("Points size: " + points.pointsCount());
-        for (int i = 0; i < faces.length; i++) {
-            System.out.print(" " + faces[i]);
-        }
-        System.out.println();
+
 
         mesh.getPoints().addAll(points.cloneRawData());
         // mesh.getNormals().addAll(normals.cloneRawData());
@@ -156,7 +152,15 @@ public class MainWindow implements Initializable {
         mesh.getFaceSmoothingGroups().clear();
         mesh.getFaceSmoothingGroups().addAll(new int[mesh.getFaces().size() / mesh.getFaceElementSize()]);
 
-        MeshView mv = new MeshView(mesh);
+        ScannedModel scannedModel = new ScannedModel(12, 5, 50f);
+
+        for (int i = 0; i < 5; i++) {
+            scannedModel.addLayer(
+                    400, 300, 500, 405, 234, 554,  435, 444, 334, 543, 343, 300
+            );
+        }
+
+        MeshView mv = new MeshView(scannedModel.mesh());
         // mv.setDrawMode(DrawMode.LINE);
         mv.setCullFace(CullFace.NONE);
         Image diffuseMap = new Image(MainWindow.class.getResource("abc.jpg").toExternalForm());
@@ -173,6 +177,7 @@ public class MainWindow implements Initializable {
         // TODO: Move model slightly above Box
         model.getChildren().add(new Box(600, 5, 600));
         model.getChildren().add(mv);
+        model.getChildren().add(scannedModel.debug);
         model.getChildren().add(am);
         model.getTransforms().add(new Scale(1, -1, 1));
 
@@ -189,9 +194,8 @@ public class MainWindow implements Initializable {
         var camera = new PerspectiveCamera(true);
         d3Scene.setCamera(camera);
 
-        // Make (0,0,0) center in camera view
+        // Camera is at (0,0,0) be default, move a bit back along Z axis
         camera.getTransforms().add(new Translate(0, 0, -2000));
-        // camera.getTransforms().add(new Translate(d3Scene.getWidth() / 2, d3Scene.getHeight() / 2, -500));
 
         // Set cliping rectangle
         camera.setNearClip(1.0);

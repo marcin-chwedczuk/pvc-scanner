@@ -6,9 +6,22 @@ public class TextureArray2D {
     private final float[] data;
 
     public TextureArray2D(int maxWidth, int maxHeight) {
+        if (maxWidth <= 0) throw new IllegalArgumentException();
+        if (maxHeight <= 0) throw new IllegalArgumentException();
+
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
         this.data = new float[maxWidth * maxHeight * 2];
+    }
+
+    public TextureArray2D(int maxWidth, int maxHeight, float[] data) {
+        if (maxWidth <= 0) throw new IllegalArgumentException();
+        if (maxHeight <= 0) throw new IllegalArgumentException();
+        if (data.length != (2 * maxHeight * maxWidth)) throw new IllegalArgumentException();
+
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.data = data;
     }
 
     private int rawIndexOf(int w, int h) {
