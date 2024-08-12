@@ -25,6 +25,7 @@ import pl.marcinchwedczuk.template.gui.mainwindow.TextureArray2D.TextureRef;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 public class MainWindow implements Initializable {
@@ -65,32 +66,37 @@ public class MainWindow implements Initializable {
         label.setText(Util.quote("Hello, world!"));
 
         Group g = new Group();
-        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
+        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
 
         final int maxH = 5;
         final int maxA = 12;
 
         PointsArray2D points = new PointsArray2D(maxA + 1, maxH);
-        PointsArray2D normals = new PointsArray2D(maxA + 1, maxH);
+        // PointsArray2D normals = new PointsArray2D(maxA + 1, maxH);
         TextureArray2D texture = new TextureArray2D(maxA + 1, maxH);
 
-        float radius = 180f, height = 500f;
+        float radiusR = 180f, height = 500f;
+        Random r = new Random();
 
         for (int h = 0; h < maxH; h++) {
-            for (int angle = 0; angle <= maxA; angle += 1) {
+            for (int angle = 0; angle < maxA; angle += 1) {
                 PointRef pointRef = points.at(angle, h);
+
+                float radius = radiusR + r.nextFloat() * radiusR / 5.0f;
 
                 // points wounded in CCW fashion
                 pointRef.setX(radius * (float)Math.cos(Math.toRadians(-angle*360.0f/maxA)));
                 pointRef.setY(height * h / maxH);
                 pointRef.setZ(radius * (float)Math.sin(Math.toRadians(-angle*360.0f/maxA)));
 
+                /*
                 PointRef normalRef = normals.at(angle, h);
 
                 // points wounded in CCW fashion
                 normalRef.setX((float)Math.cos(Math.toRadians(-angle*360.0f/maxA)));
                 normalRef.setY(0);
                 normalRef.setZ((float)Math.sin(Math.toRadians(-angle*360.0f/maxA)));
+                */
 
                 Sphere marker = new Sphere(10.0);
                 Color color = Color.hsb(angle * 360.0f / maxA, 1.0, 1.0);
@@ -107,43 +113,39 @@ public class MainWindow implements Initializable {
         }
 
         // Add faces
-        int[] faces = new int[3 * (maxH - 1) * (maxA) * 6];
+        int[] faces = new int[mesh.getPointElementSize() * 3 * 2 * (maxH - 1) * (maxA)];
         for (int h = 0; h < maxH - 1; h++) {
             for (int angle = 0; angle < maxA; angle++) {
-                int idx = 3 * 6 * (h * maxA + angle);
+                int idx = mesh.getPointElementSize() * 3 * 2 * (h * maxA + angle);
                 int nextH = (h + 1);
-                int nextA = (angle + 1) % (maxA + 1);
+                int nextA = (angle + 1) % (maxA);
                 System.out.printf("Adding triangles for vertice: %d x %d (point: %s)%n", h, angle, points.at(angle, h).toString());
 
                 // top triangle
-                faces[idx + 0] = points.facesIndexOf(angle, nextH);
-                faces[idx + 1] = normals.facesIndexOf(angle, nextH);
-                faces[idx + 2] = texture.facesIndexOf(angle, nextH);// texture
+                faces[idx ++] = points.facesIndexOf(angle, nextH);
+                // faces[idx ++] = normals.facesIndexOf(angle, nextH);
+                faces[idx ++] = texture.facesIndexOf(angle, nextH);// texture
 
-                faces[idx + 3] = points.facesIndexOf(nextA, h);
-                faces[idx + 4] = normals.facesIndexOf(nextA, h);
-                faces[idx + 5] = texture.facesIndexOf(nextA, h); // texture
+                faces[idx++] = points.facesIndexOf(nextA, h);
+                // faces[idx++] = normals.facesIndexOf(nextA, h);
+                faces[idx++] = texture.facesIndexOf(nextA, h); // texture
 
-                faces[idx + 6] = points.facesIndexOf(nextA, nextH);
-                faces[idx + 7] = normals.facesIndexOf(nextA, nextH);
-                faces[idx + 8] = texture.facesIndexOf(nextA, nextH); // texture
+                faces[idx++] = points.facesIndexOf(nextA, nextH);
+                // faces[idx++] = normals.facesIndexOf(nextA, nextH);
+                faces[idx++] = texture.facesIndexOf(nextA, nextH); // texture
 
                 // bottom triangle
-                idx += 9;
+                faces[idx++] = points.facesIndexOf(angle, h);
+                // faces[idx++] = normals.facesIndexOf(angle, h);
+                faces[idx++] = texture.facesIndexOf(angle, h);
 
-                System.out.println("faces Index at " + angle + ", " + h + " = " + points.facesIndexOf(angle, h));
+                faces[idx++] = points.facesIndexOf(nextA, h);
+                // faces[idx++] = normals.facesIndexOf(nextA, h);
+                faces[idx++] = texture.facesIndexOf(nextA, h);
 
-                faces[idx + 0] = points.facesIndexOf(angle, h);
-                faces[idx + 1] = normals.facesIndexOf(angle, h);
-                faces[idx + 2] = texture.facesIndexOf(angle, h);
-
-                faces[idx + 3] = points.facesIndexOf(nextA, h);
-                faces[idx + 4] = normals.facesIndexOf(nextA, h);
-                faces[idx + 5] = texture.facesIndexOf(nextA, h);
-
-                faces[idx + 6] = points.facesIndexOf(angle, nextH);
-                faces[idx + 7] = normals.facesIndexOf(angle, nextH);
-                faces[idx + 8] = texture.facesIndexOf(angle, nextH);
+                faces[idx++] = points.facesIndexOf(angle, nextH);
+                // faces[idx++] = normals.facesIndexOf(angle, nextH);
+                faces[idx++] = texture.facesIndexOf(angle, nextH);
             }
         }
 
@@ -154,19 +156,22 @@ public class MainWindow implements Initializable {
         System.out.println();
 
         mesh.getPoints().addAll(points.cloneRawData());
-        mesh.getNormals().addAll(normals.cloneRawData());
+        // mesh.getNormals().addAll(normals.cloneRawData());
         mesh.getTexCoords().addAll(texture.cloneRawData());
         mesh.getFaces().addAll(faces);
+
+        mesh.getFaceSmoothingGroups().clear();
+        mesh.getFaceSmoothingGroups().addAll(new int[mesh.getFaces().size() / mesh.getFaceElementSize()]);
 
         MeshView mv = new MeshView(mesh);
         // mv.setDrawMode(DrawMode.LINE);
         // mv.setCullFace(CullFace.NONE);
         Image diffuseMap = new Image(MainWindow.class.getResource("abc.jpg").toExternalForm());
         PhongMaterial earthMaterial = new PhongMaterial();
-        earthMaterial.setDiffuseMap(diffuseMap);
-
+        // earthMaterial.setDiffuseMap(diffuseMap);
+        earthMaterial.setDiffuseColor(Color.RED);
         mv.setMaterial(earthMaterial);
-        // mv.setTranslateX(70);
+
         mv.setRotationAxis(new Point3D(1, 1, 0));
         mv.rotateProperty().bind(rotateSlider.valueProperty());
         // display3D.getChildren().add(new AmbientLight(Color.GRAY));
