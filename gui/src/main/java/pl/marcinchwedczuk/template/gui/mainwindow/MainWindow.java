@@ -18,6 +18,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import pl.marcinchwedczuk.template.domain.Util;
 import pl.marcinchwedczuk.template.gui.mainwindow.PointsArray2D.PointRef;
@@ -169,6 +170,7 @@ public class MainWindow implements Initializable {
         am.scale(15);
 
         Group model = new Group();
+        // TODO: Move model slightly above Box
         model.getChildren().add(new Box(600, 5, 600));
         model.getChildren().add(mv);
         model.getChildren().add(am);
@@ -184,13 +186,12 @@ public class MainWindow implements Initializable {
         SubScene d3Scene = new SubScene(sceneGroup, 800, 640, true, SceneAntialiasing.DISABLED);
 
         // default at (0, 0, 0) looking at -z.
-        var camera = new PerspectiveCamera();
+        var camera = new PerspectiveCamera(true);
         d3Scene.setCamera(camera);
 
         // Make (0,0,0) center in camera view
-        camera.setTranslateX(-d3Scene.getWidth() / 2);
-        camera.setTranslateY(-d3Scene.getHeight() / 2);
-        camera.setTranslateZ(-500);
+        camera.getTransforms().add(new Translate(0, 0, -2000));
+        // camera.getTransforms().add(new Translate(d3Scene.getWidth() / 2, d3Scene.getHeight() / 2, -500));
 
         // Set cliping rectangle
         camera.setNearClip(1.0);
