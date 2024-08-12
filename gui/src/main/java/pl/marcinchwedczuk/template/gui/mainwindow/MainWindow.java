@@ -29,6 +29,8 @@ import java.io.SerializablePermission;
 import java.net.URL;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainWindow implements Initializable {
     public static MainWindow showOn(Stage window) {
@@ -152,13 +154,31 @@ public class MainWindow implements Initializable {
         mesh.getFaceSmoothingGroups().clear();
         mesh.getFaceSmoothingGroups().addAll(new int[mesh.getFaces().size() / mesh.getFaceElementSize()]);
 
-        ScannedModel scannedModel = new ScannedModel(12, 5, 50f);
+        ScannedModel scannedModel = new ScannedModel(12, 12, 50f);
 
-        for (int i = 0; i < 5; i++) {
-            scannedModel.addLayer(
-                    400, 300, 500, 405, 234, 554,  435, 444, 334, 543, 343, 300
-            );
-        }
+        Timer t = new Timer("layersTimer", true);
+        t.scheduleAtFixedRate(new TimerTask() {
+            private int layer = 0;
+
+            @Override
+            public void run() {
+                if (layer >= 12) {
+                    this.cancel();
+                    return;
+                }
+                layer++;
+
+                Platform.runLater(() -> {
+                    float[] data = { 400, 300, 500, 405, 234, 554,  435, 444, 334, 543, 343, 300 };
+                    Random r = new Random();
+                    for (int i = 0; i < data.length; i++) {
+                        data[i] -= r.nextFloat() * 50;
+                    }
+
+                    scannedModel.addLayer(data);
+                });
+            }
+        }, 1000, 2000);
 
         MeshView mv = new MeshView(scannedModel.mesh());
         // mv.setDrawMode(DrawMode.LINE);
