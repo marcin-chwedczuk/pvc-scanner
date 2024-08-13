@@ -17,7 +17,7 @@
         <VBox>
             <ToolBar>
 
-                <Button>
+                <Button onAction="#saveModel">
                     <graphic>
                         <ImageView fitHeight="16" fitWidth="16">
                             <Image url="@document-save.png" />

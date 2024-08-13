@@ -22,9 +22,11 @@ import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.marcinchwedczuk.template.gui.mainwindow.SerialInterface.GetSerialPorts;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -153,5 +155,22 @@ public class MainWindow implements Initializable {
 
     public void closeApp(ActionEvent event) {
         Platform.exit();
+    }
+
+    public void saveModel(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("OBJ files (*.obj)", "*.obj");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File file = fileChooser.showSaveDialog(mainWindow.getScene().getWindow());
+
+        try {
+            if (file != null) {
+                scannedModel.saveToObjFile(file.toPath());
+            }
+        } catch (Exception e) {
+            UiService.errorDialog("Cannot save model: " + e.getMessage());
+        }
     }
 }
