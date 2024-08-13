@@ -88,56 +88,10 @@ public class MainWindow implements Initializable {
 
 
         Group sceneGroup = new Group();
-        Rotate rty = new Rotate(0, Rotate.Y_AXIS);
-        Rotate rtx = new Rotate(0, Rotate.X_AXIS);
-        sceneGroup.getTransforms().addAll(rty);
         sceneGroup.getChildren().addAll(model, am);
 
-        SubScene d3Scene = new SubScene(sceneGroup, 800, 640, true, SceneAntialiasing.DISABLED);
+        PreviewSubscene d3Scene = new PreviewSubscene(sceneGroup, 800, 640);
 
-        // default at (0, 0, 0) looking at -z.
-        var camera = new PerspectiveCamera(true);
-        d3Scene.setCamera(camera);
-
-        // Camera is at (0,0,0) be default, move a bit back along Z axis
-        camera.getTransforms().add(rtx);
-        camera.getTransforms().add(new Translate(0, -d3Scene.getHeight() / 2, -2000));
-
-        // Set cliping rectangle
-        camera.setNearClip(1.0);
-        camera.setFarClip(10000.0);
-
-        AtomicInteger xx = new AtomicInteger(-1);
-        AtomicInteger anglexx = new AtomicInteger(-1);
-        AtomicInteger yy = new AtomicInteger(-1);
-        AtomicInteger angleyy = new AtomicInteger(-1);
-        d3Scene.setOnMousePressed(e -> {
-            xx.set((int)e.getScreenX());
-            yy.set((int)e.getScreenY());
-            anglexx.set((int)rty.angleProperty().get());
-            angleyy.set((int)rtx.angleProperty().get());
-            System.out.println("pressed");
-        });
-        d3Scene.setOnMouseDragged(e -> {
-            if (xx.get() == -1) return;
-
-            int dx = (int)e.getScreenX() - xx.get();
-            int dy = (int)e.getScreenY() - yy.get();
-            System.out.println("moved dx = " + dx + ", dy = " + dy);
-
-            rty.angleProperty().set(anglexx.get() + (-dx));
-
-            // TODO: Rotate the axis so that it is always perpendicular to the view (or rotated by prev transform).
-            rtx.angleProperty().set(angleyy.get() - dy);
-        });
-        d3Scene.setOnMouseReleased(e -> {
-            xx.set(-1);
-            yy.set(-1);
-            System.out.println("released");
-        });
-
-        // camera.setTranslateZ(-800);
-        d3Scene.setFill(Color.GRAY);
         display3D.getChildren().add(d3Scene);
     }
 
