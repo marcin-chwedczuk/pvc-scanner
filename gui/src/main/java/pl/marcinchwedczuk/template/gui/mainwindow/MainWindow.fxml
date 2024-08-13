@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.Pane?>
-<BorderPane minHeight="800" minWidth="1000"
+<BorderPane minHeight="900" minWidth="1400"
             styleClass="mainWindow" stylesheets="@MainWindow.css"
             xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/"
             fx:controller="pl.marcinchwedczuk.template.gui.mainwindow.MainWindow"

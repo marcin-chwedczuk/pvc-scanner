@@ -76,6 +76,10 @@ public class MainWindow implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         serialInterface = new SerialInterface();
+        serialInterface.setLogger(new SerialPortLogger(logLine -> {
+            logTextArea.appendText(logLine);
+            logTextArea.appendText(System.lineSeparator());
+        }));
         serialInterface.start();
 
         scannedModel = new ScannedModel(12, 12, 50f);
@@ -121,7 +125,8 @@ public class MainWindow implements Initializable {
         subsceneParent.getChildren().add(d3Scene);
         splitPane.getItems().addFirst(subsceneParent);
 
-        serialInterface.sent(new GetSerialPorts()
+
+        serialInterface.sent(serialInterface.new GetSerialPorts()
                 .setOnSuccess(ports -> {
                     List<SerialPortItem> uiPorts = ports.stream().map(SerialPortItem::new).toList();
                     serialPortComboBox.setItems(FXCollections.observableArrayList(uiPorts));
@@ -145,7 +150,7 @@ public class MainWindow implements Initializable {
     public void refreshSerialPorts(ActionEvent event) {
         refreshSerialPortsButton.setDisable(true);
 
-        serialInterface.sent(new GetSerialPorts()
+        serialInterface.sent(serialInterface.new GetSerialPorts()
                 .setOnSuccess(ports -> {
                     refreshSerialPortsButton.setDisable(false);
                     List<SerialPortItem> uiPorts = ports.stream().map(SerialPortItem::new).toList();
