@@ -71,7 +71,7 @@ public class ScannedModel {
 
             TextureRef textureRef = texture.at(i, 0);
             textureRef.setX((float)i / angles);
-            textureRef.setY((float)previousLayersCount / layers);
+            textureRef.setY((float)previousLayersCount / (layers-1));
         }
 
         mesh.getPoints().addAll(points.cloneRawData());

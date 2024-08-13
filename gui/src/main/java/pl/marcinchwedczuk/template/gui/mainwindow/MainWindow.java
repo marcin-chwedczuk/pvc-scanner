@@ -73,91 +73,6 @@ public class MainWindow implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         label.setText(Util.quote("Hello, world!"));
 
-        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
-
-        final int maxH = 7;
-        final int maxA = 12;
-
-        PointsArray2D points = new PointsArray2D(maxA + 1, maxH);
-        // PointsArray2D normals = new PointsArray2D(maxA + 1, maxH);
-        TextureArray2D texture = new TextureArray2D(maxA + 1, maxH);
-
-        float radiusR = 180f, height = 500f;
-        Random r = new Random();
-
-        for (int h = 0; h < maxH; h++) {
-            for (int angle = 0; angle < maxA; angle += 1) {
-                PointRef pointRef = points.at(angle, h);
-
-                float radius = (radiusR + r.nextFloat() * radiusR / 5.0f) / (float)Math.log(h + 2);
-
-                // points wounded in CCW fashion
-                pointRef.setX(radius * (float)Math.cos(Math.toRadians(-angle*360.0f/maxA)));
-                pointRef.setY(height * h / maxH);
-                pointRef.setZ(radius * (float)Math.sin(Math.toRadians(-angle*360.0f/maxA)));
-
-                /*
-                PointRef normalRef = normals.at(angle, h);
-
-                // points wounded in CCW fashion
-                normalRef.setX((float)Math.cos(Math.toRadians(-angle*360.0f/maxA)));
-                normalRef.setY(0);
-                normalRef.setZ((float)Math.sin(Math.toRadians(-angle*360.0f/maxA)));
-                */
-
-                TextureRef textureRef = texture.at(angle, h);
-                textureRef.setX(1.0f * angle / maxA);
-                textureRef.setY(1.0f * h / maxH);
-            }
-        }
-
-        // Add faces
-        int[] faces = new int[mesh.getPointElementSize() * 3 * 2 * (maxH - 1) * (maxA)];
-        for (int h = 0; h < maxH - 1; h++) {
-            for (int angle = 0; angle < maxA; angle++) {
-                int idx = mesh.getPointElementSize() * 3 * 2 * (h * maxA + angle);
-                int nextH = (h + 1);
-                int nextA = (angle + 1) % (maxA);
-                System.out.printf("Adding triangles for vertice: %d x %d (point: %s)%n", h, angle, points.at(angle, h).toString());
-
-                // top triangle
-                faces[idx ++] = points.facesIndexOf(angle, nextH);
-                // faces[idx ++] = normals.facesIndexOf(angle, nextH);
-                faces[idx ++] = texture.facesIndexOf(angle, nextH);// texture
-
-                faces[idx++] = points.facesIndexOf(nextA, h);
-                // faces[idx++] = normals.facesIndexOf(nextA, h);
-                faces[idx++] = texture.facesIndexOf(nextA, h); // texture
-
-                faces[idx++] = points.facesIndexOf(nextA, nextH);
-                // faces[idx++] = normals.facesIndexOf(nextA, nextH);
-                faces[idx++] = texture.facesIndexOf(nextA, nextH); // texture
-
-                // bottom triangle
-                faces[idx++] = points.facesIndexOf(angle, h);
-                // faces[idx++] = normals.facesIndexOf(angle, h);
-                faces[idx++] = texture.facesIndexOf(angle, h);
-
-                faces[idx++] = points.facesIndexOf(nextA, h);
-                // faces[idx++] = normals.facesIndexOf(nextA, h);
-                faces[idx++] = texture.facesIndexOf(nextA, h);
-
-                faces[idx++] = points.facesIndexOf(angle, nextH);
-                // faces[idx++] = normals.facesIndexOf(angle, nextH);
-                faces[idx++] = texture.facesIndexOf(angle, nextH);
-            }
-        }
-
-
-
-        mesh.getPoints().addAll(points.cloneRawData());
-        // mesh.getNormals().addAll(normals.cloneRawData());
-        mesh.getTexCoords().addAll(texture.cloneRawData());
-        mesh.getFaces().addAll(faces);
-
-        mesh.getFaceSmoothingGroups().clear();
-        mesh.getFaceSmoothingGroups().addAll(new int[mesh.getFaces().size() / mesh.getFaceElementSize()]);
-
         scannedModel = new ScannedModel(12, 12, 50f);
 
         Timer t = new Timer("layersTimer", true);
@@ -189,8 +104,8 @@ public class MainWindow implements Initializable {
         mv.setCullFace(CullFace.NONE);
         Image diffuseMap = new Image(MainWindow.class.getResource("abc.jpg").toExternalForm());
         PhongMaterial earthMaterial = new PhongMaterial();
-        // earthMaterial.setDiffuseMap(diffuseMap);
-        earthMaterial.setDiffuseColor(Color.RED);
+        earthMaterial.setDiffuseMap(diffuseMap);
+        // earthMaterial.setDiffuseColor(Color.RED);
         mv.setMaterial(earthMaterial);
 
 
