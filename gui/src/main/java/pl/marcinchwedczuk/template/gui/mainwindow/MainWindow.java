@@ -31,10 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainWindow implements Initializable {
@@ -71,7 +68,7 @@ public class MainWindow implements Initializable {
     private TextArea logTextArea;
 
     @FXML
-    private ComboBox<SerialPort> serialPortComboBox;
+    private ComboBox<SerialPortItem> serialPortComboBox;
 
     ScannedModel scannedModel;
     SerialInterface serialInterface;
@@ -126,7 +123,8 @@ public class MainWindow implements Initializable {
 
         serialInterface.sent(new GetSerialPorts()
                 .setOnSuccess(ports -> {
-                    serialPortComboBox.setItems(FXCollections.observableArrayList(ports));
+                    List<SerialPortItem> uiPorts = ports.stream().map(SerialPortItem::new).toList();
+                    serialPortComboBox.setItems(FXCollections.observableArrayList(uiPorts));
                 })
                 .setOnFailure(this::handleSerialException));
     }
@@ -150,7 +148,8 @@ public class MainWindow implements Initializable {
         serialInterface.sent(new GetSerialPorts()
                 .setOnSuccess(ports -> {
                     refreshSerialPortsButton.setDisable(false);
-                    serialPortComboBox.setItems(FXCollections.observableArrayList(ports));
+                    List<SerialPortItem> uiPorts = ports.stream().map(SerialPortItem::new).toList();
+                    serialPortComboBox.setItems(FXCollections.observableArrayList(uiPorts));
                 })
                 .setOnFailure(e -> {
                     refreshSerialPortsButton.setDisable(false);
