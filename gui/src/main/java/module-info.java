@@ -4,6 +4,8 @@ module pl.marcinchwedczuk.template.gui {
     requires javafx.controls;
     requires javafx.fxml;
     requires com.fazecast.jSerialComm;
+    requires java.desktop;
+    requires java.net.http;
 
     exports pl.marcinchwedczuk.template.gui;
     exports pl.marcinchwedczuk.template.gui.mainwindow;

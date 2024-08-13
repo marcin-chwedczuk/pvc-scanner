@@ -35,7 +35,7 @@ public class ScannedModel {
 
     private final Group previewPoints = new Group();
 
-    private final Group scannedModel = new Group();
+    private final Group model3DNode = new Group();
 
     public ScannedModel(int angles, int layers, float layerHeight) {
         if (angles <= 0) throw new IllegalArgumentException("angles");
@@ -57,7 +57,7 @@ public class ScannedModel {
         material.setDiffuseColor(Color.RED);
         meshView.setMaterial(material);
 
-        scannedModel.getChildren().addAll(previewPoints, meshView);
+        model3DNode.getChildren().addAll(previewPoints, meshView);
     }
 
     public int angles() {
@@ -72,8 +72,8 @@ public class ScannedModel {
         return layerHeight;
     }
 
-    public Group scannedModel() {
-        return scannedModel;
+    public Group model3DNode() {
+        return model3DNode;
     }
 
     public void addScanPoint(float distanceFromCenter) {

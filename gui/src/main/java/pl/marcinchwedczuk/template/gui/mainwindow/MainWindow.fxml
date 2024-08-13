@@ -17,7 +17,7 @@
         <VBox>
             <ToolBar>
 
-                <Button onAction="#saveModel">
+                <Button fx:id="saveButton" onAction="#saveModel">
                     <graphic>
                         <ImageView fitHeight="16" fitWidth="16">
                             <Image url="@document-save.png" />
@@ -40,7 +40,7 @@
                 <ComboBox fx:id="layersComboBox" />
                 <Label>Angles:</Label>
                 <ComboBox fx:id="anglesComboBox" />
-                <Button onAction="#startScan">
+                <Button fx:id="startButton" onAction="#startScan">
                     <graphic>
                         <ImageView fitHeight="16" fitWidth="16">
                             <Image url="@camera-video.png" />
@@ -48,7 +48,7 @@
                     </graphic>
                     Start
                 </Button>
-                <Button disable="true" onAction="#stopScan">
+                <Button fx:id="stopButton" onAction="#stopScan">
                     <graphic>
                         <ImageView fitHeight="16" fitWidth="16">
                             <Image url="@process-stop.png" />

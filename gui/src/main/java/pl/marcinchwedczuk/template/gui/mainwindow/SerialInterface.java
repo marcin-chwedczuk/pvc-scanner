@@ -2,13 +2,10 @@ package pl.marcinchwedczuk.template.gui.mainwindow;
 
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
-import javafx.util.Callback;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -23,7 +20,9 @@ public class SerialInterface {
         this.logger = requireNonNull(logger);
     }
 
-    public void start() {
+    public void startWorkerThread() {
+        if (workerThread.isAlive()) return;
+
         workerThread.setDaemon(true);
         workerThread.start();
     }
@@ -37,7 +36,7 @@ public class SerialInterface {
                     continue;
                 }
 
-                msg.execute();
+                msg.execute(logger);
             }
         } catch (InterruptedException e) {
             // exit loop
@@ -49,23 +48,28 @@ public class SerialInterface {
         messageQueue.offer(msg);
     }
 
-    public abstract class Message<R> {
+    public static abstract class Message<R> {
         private Consumer<R> onSuccess = p -> { };
         private Consumer<Exception> onFailure = p -> { };
+        private Runnable atExit = () -> { };
 
-        abstract R innerExecute();
+        abstract R innerExecute(SerialPortLogger logger);
 
-        void execute() {
+        void execute(SerialPortLogger logger) {
             R result;
             try {
-                result = innerExecute();
+                result = innerExecute(logger);
                 Platform.runLater(() -> {
                     onSuccess.accept(result);
                 });
             } catch (Exception e) {
-                logger.logEvent(String.format("Exception %s: %s", e.getClass().getSimpleName(), e.getMessage()));
+                logger.logEvent(String.format("ERROR %s: %s", e.getClass().getSimpleName(), e.getMessage()));
                 Platform.runLater(() -> {
                     onFailure.accept(e);
+                });
+            } finally {
+                Platform.runLater(() -> {
+                    atExit.run();
                 });
             }
         }
@@ -79,11 +83,16 @@ public class SerialInterface {
             this.onFailure = requireNonNull(onFailure);
             return this;
         }
+
+        public Message<R> setAtExit(Runnable atExit) {
+            this.atExit = requireNonNull(atExit);
+            return this;
+        }
     }
 
-    public class GetSerialPorts extends Message<List<SerialPort>> {
+    public static class GetSerialPorts extends Message<List<SerialPort>> {
         @Override
-        List<SerialPort> innerExecute() {
+        List<SerialPort> innerExecute(SerialPortLogger logger) {
             SerialPort[] ports = SerialPort.getCommPorts();
 
             logger.logEvent("Discovered serial ports:");
@@ -95,7 +104,7 @@ public class SerialInterface {
         }
     }
 
-    public class OpenSerialPort extends Message<SerialPort> {
+    public static class OpenSerialPort extends Message<SerialPort> {
         private static final int TIMEOUT = 15000;
         private final SerialPort port;
 
@@ -104,7 +113,7 @@ public class SerialInterface {
         }
 
         @Override
-        SerialPort innerExecute() {
+        SerialPort innerExecute(SerialPortLogger logger) {
             if (port.openPort()) {
                 port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, TIMEOUT, TIMEOUT);
                 logger.logEvent("Port open.");
@@ -115,7 +124,7 @@ public class SerialInterface {
         }
     }
 
-    public class CloseSerialPort extends Message<SerialPort> {
+    public static class CloseSerialPort extends Message<SerialPort> {
         private final SerialPort port;
 
         public CloseSerialPort(SerialPort port) {
@@ -123,13 +132,13 @@ public class SerialInterface {
         }
 
         @Override
-        SerialPort innerExecute() {
+        SerialPort innerExecute(SerialPortLogger logger) {
             port.closePort();
             return port;
         }
     }
 
-    public class SendCommand extends Message<String> {
+    public static class SendCommand extends Message<String> {
         private final SerialPort port;
         private final String message;
 
@@ -139,7 +148,7 @@ public class SerialInterface {
         }
 
         @Override
-        String innerExecute() {
+        String innerExecute(SerialPortLogger logger) {
             String msg = message;
             if (!message.endsWith("\n")) {
                 msg += "\n";
