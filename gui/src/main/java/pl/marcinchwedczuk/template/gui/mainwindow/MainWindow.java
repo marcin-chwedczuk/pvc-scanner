@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
@@ -59,6 +60,9 @@ public class MainWindow implements Initializable {
 
     @FXML
     private BorderPane mainWindow;
+
+    @FXML
+    private Button refreshSerialPortsButton;
 
     @FXML
     private SplitPane splitPane;
@@ -120,7 +124,6 @@ public class MainWindow implements Initializable {
         subsceneParent.getChildren().add(d3Scene);
         splitPane.getItems().addFirst(subsceneParent);
 
-
         serialInterface.sent(new GetSerialPorts()
                 .setOnSuccess(ports -> {
                     serialPortComboBox.setItems(FXCollections.observableArrayList(ports));
@@ -142,7 +145,17 @@ public class MainWindow implements Initializable {
     }
 
     public void refreshSerialPorts(ActionEvent event) {
+        refreshSerialPortsButton.setDisable(true);
 
+        serialInterface.sent(new GetSerialPorts()
+                .setOnSuccess(ports -> {
+                    refreshSerialPortsButton.setDisable(false);
+                    serialPortComboBox.setItems(FXCollections.observableArrayList(ports));
+                })
+                .setOnFailure(e -> {
+                    refreshSerialPortsButton.setDisable(false);
+                    handleSerialException(e);
+                }));
     }
 
     public void startScan(ActionEvent event) {

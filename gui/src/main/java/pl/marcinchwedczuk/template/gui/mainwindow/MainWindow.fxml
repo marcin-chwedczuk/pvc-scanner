@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.Pane?>
-<BorderPane minHeight="640" minWidth="800"
+<BorderPane minHeight="800" minWidth="1000"
             styleClass="mainWindow" stylesheets="@MainWindow.css"
             xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/"
             fx:controller="pl.marcinchwedczuk.template.gui.mainwindow.MainWindow"
@@ -28,7 +28,7 @@
                 <Separator orientation="VERTICAL" />
                 <Label>Serial port:</Label>
                 <ComboBox fx:id="serialPortComboBox" />
-                <Button onAction="#refreshSerialPorts">
+                <Button fx:id="refreshSerialPortsButton" onAction="#refreshSerialPorts">
                     <graphic>
                         <ImageView fitHeight="16" fitWidth="16">
                             <Image url="@view-refresh.png" />
