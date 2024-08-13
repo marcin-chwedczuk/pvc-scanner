@@ -206,7 +206,7 @@ public class MainWindow implements Initializable {
         Group sceneGroup = new Group();
         Rotate rty = new Rotate(0, Rotate.Y_AXIS);
         Rotate rtx = new Rotate(0, Rotate.X_AXIS);
-        sceneGroup.getTransforms().addAll(rty, rtx);
+        sceneGroup.getTransforms().addAll(rty);
         sceneGroup.getChildren().addAll(model, am);
 
         SubScene d3Scene = new SubScene(sceneGroup, 800, 640, true, SceneAntialiasing.DISABLED);
@@ -216,6 +216,7 @@ public class MainWindow implements Initializable {
         d3Scene.setCamera(camera);
 
         // Camera is at (0,0,0) be default, move a bit back along Z axis
+        camera.getTransforms().add(rtx);
         camera.getTransforms().add(new Translate(0, -d3Scene.getHeight() / 2, -2000));
 
         // Set cliping rectangle
@@ -243,7 +244,7 @@ public class MainWindow implements Initializable {
             rty.angleProperty().set(anglexx.get() + (-dx));
 
             // TODO: Rotate the axis so that it is always perpendicular to the view (or rotated by prev transform).
-            rtx.angleProperty().set(angleyy.get() + dy);
+            rtx.angleProperty().set(angleyy.get() - dy);
         });
         d3Scene.setOnMouseReleased(e -> {
             xx.set(-1);
