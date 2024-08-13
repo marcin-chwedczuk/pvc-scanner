@@ -1,12 +1,16 @@
 package pl.marcinchwedczuk.template.gui.mainwindow;
 
 import javafx.scene.Group;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Sphere;
 import javafx.scene.shape.TriangleMesh;
-import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Translate;
 import pl.marcinchwedczuk.template.gui.mainwindow.PointsArray2D.PointRef;
 import pl.marcinchwedczuk.template.gui.mainwindow.TextureArray2D.TextureRef;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static javafx.scene.shape.VertexFormat.POINT_TEXCOORD;
 
@@ -44,12 +48,11 @@ public class ScannedModel {
         if (distancesFromCenter.length != angles)
             throw new IllegalArgumentException("Incorrect number of distances for a layer.");
 
-        // TODO: Update class state only when the entire op is success
-        int previousLayersNumber = getNumberOfLayers();
-        if (previousLayersNumber >= layers)
+        int previousLayersCount = getNumberOfLayers();
+        if (previousLayersCount >= layers)
             throw new IllegalStateException("Too many layers");
 
-        float currentHeight = previousLayersNumber * layerHeight + 55;
+        float currentHeight = previousLayersCount * layerHeight + 55;
 
         // Add points and text coordinates and wrap last point
         var points = new PointsArray2D(angles + 1, 1);
@@ -68,48 +71,45 @@ public class ScannedModel {
 
             TextureRef textureRef = texture.at(i, 0);
             textureRef.setX((float)i / angles);
-            textureRef.setY((float)previousLayersNumber / layers);
+            textureRef.setY((float)previousLayersCount / layers);
         }
 
         mesh.getPoints().addAll(points.cloneRawData());
         mesh.getTexCoords().addAll(texture.cloneRawData());
 
-        if (previousLayersNumber >= 1) {
-            // Wrapper around existing points for easy addressing
-            points = new PointsArray2D(angles + 1, (previousLayersNumber + 1), mesh.getPoints().toArray(new float[0]));
-            // printArray("Current points: ", points.cloneRawData());
-            texture = new TextureArray2D(angles + 1, (previousLayersNumber + 1), mesh.getTexCoords().toArray(new float[0]));
-            // printArray("Current textures: ", texture.cloneRawData());
+        if (previousLayersCount >= 1) {
+            int anglesCount = angles + 1;
+            int layersCount = (previousLayersCount + 1);
 
             // Create faces strip
-            int[] faces = new int[mesh.getPointElementSize() * 3 * 2 * angles];
+            int[] faces = new int[mesh.getFaceElementSize() * 2 * angles];
 
             for (int angle = 0; angle < angles; angle++) {
-                int idx = mesh.getPointElementSize() * 3 * 2 * angle;
+                int idx = mesh.getFaceElementSize() * 2 * angle;
                 // after adding points we now have extra layer on top of currentLayersNumber layer
-                int h = previousLayersNumber - 1;
-                int nextH = previousLayersNumber;
+                int layer = previousLayersCount - 1;
+                int nextL = previousLayersCount;
                 int nextA = (angle + 1) % (angles + 1);
 
                 // top triangle
-                faces[idx++] = points.facesIndexOf(angle, nextH);
-                faces[idx++] = texture.facesIndexOf(angle, nextH);
+                faces[idx++] = facesIndexOf(angle, nextL, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(angle, nextL, anglesCount, layersCount);
 
-                faces[idx++] = points.facesIndexOf(nextA, h);
-                faces[idx++] = texture.facesIndexOf(nextA, h);
+                faces[idx++] = facesIndexOf(nextA, layer, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(nextA, layer, anglesCount, layersCount);
 
-                faces[idx++] = points.facesIndexOf(nextA, nextH);
-                faces[idx++] = texture.facesIndexOf(nextA, nextH);
+                faces[idx++] = facesIndexOf(nextA, nextL, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(nextA, nextL, anglesCount, layersCount);
 
                 // bottom triangle
-                faces[idx++] = points.facesIndexOf(angle, h);
-                faces[idx++] = texture.facesIndexOf(angle, h);
+                faces[idx++] = facesIndexOf(angle, layer, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(angle, layer, anglesCount, layersCount);
 
-                faces[idx++] = points.facesIndexOf(nextA, h);
-                faces[idx++] = texture.facesIndexOf(nextA, h);
+                faces[idx++] = facesIndexOf(nextA, layer, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(nextA, layer, anglesCount, layersCount);
 
-                faces[idx++] = points.facesIndexOf(angle, nextH);
-                faces[idx++] = texture.facesIndexOf(angle, nextH);
+                faces[idx++] = facesIndexOf(angle, nextL, anglesCount, layersCount);
+                faces[idx++] = facesIndexOf(angle, nextL, anglesCount, layersCount);
             }
 
             mesh.getFaces().addAll(faces);
@@ -126,14 +126,68 @@ public class ScannedModel {
         return points / pointsPerLayer;
     }
 
+    public static int facesIndexOf(int angle, int layer, int anglesCount, int layersCount) {
+        if (angle < 0 || angle >= anglesCount)
+            throw new IndexOutOfBoundsException("w");
+
+        if (layer < 0 || layer >= layersCount)
+            throw new IndexOutOfBoundsException(String.format("index should be between [0..%d] but was %d", layersCount, layer));
+
+        return (anglesCount * layer + angle);
+    }
+
     public TriangleMesh mesh() {
         return mesh;
     }
 
+    public void saveToObjFile(java.nio.file.Path path) throws IOException {
+        try(BufferedWriter objFile = Files.newBufferedWriter(path)) {
+            objFile.write(String.format("# Created by pvc-scanner%n"));
+
+            // Write vertices
+            for (int i = 0; i < mesh.getPoints().size(); i += 3) {
+                float x = mesh.getPoints().get(i);
+                float y = mesh.getPoints().get(i + 1);
+                float z = mesh.getPoints().get(i + 2);
+                objFile.write(String.format("v %.3f %.3f %.3f%n", x, y, z));
+            }
+
+            // Write texture coords
+            for (int i = 0; i < mesh.getTexCoords().size(); i += 2) {
+                float u = mesh.getTexCoords().get(i);
+                float v = mesh.getTexCoords().get(i + 1);
+                objFile.write(String.format("vt %.3f %.3f%n", u, v));
+            }
+
+            // Write faces
+            for (int i = 0; i < mesh.getFaces().size(); i += 6) {
+                // Obj uses 1 as the starting index
+                int p0 = 1 + mesh.getFaces().get(i);
+                int t0 = 1 + mesh.getFaces().get(i + 1);
+
+                int p1 = 1 + mesh.getFaces().get(i + 2);
+                int t1 = 1 + mesh.getFaces().get(i + 3);
+
+                int p2 = 1 + mesh.getFaces().get(i + 4);
+                int t2 = 1 + mesh.getFaces().get(i + 5);
+
+                objFile.write(String.format("f %d/%d %d/%d %d/%d%n", p0, t0, p1, t1, p2, t2));
+            }
+        }
+    }
+
     private static void printArray(String msg, float[] data) {
         System.out.println("DEBUG(" + msg + "): ");
-        for (int i = 0; i < data.length; i++) {
-            System.out.print(" " + data[i]);
+        for (float d : data) {
+            System.out.print(" " + d);
+        }
+        System.out.println();
+    }
+
+    private static void printArray(String msg, int[] data) {
+        System.out.println("DEBUG(" + msg + "): ");
+        for (int d : data) {
+            System.out.print(" " + d);
         }
         System.out.println();
     }

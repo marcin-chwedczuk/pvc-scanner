@@ -27,6 +27,7 @@ import pl.marcinchwedczuk.template.gui.mainwindow.TextureArray2D.TextureRef;
 import java.io.IOException;
 import java.io.SerializablePermission;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
@@ -65,6 +66,8 @@ public class MainWindow implements Initializable {
 
     @FXML
     private StackPane display3D;
+
+    ScannedModel scannedModel;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -155,7 +158,7 @@ public class MainWindow implements Initializable {
         mesh.getFaceSmoothingGroups().clear();
         mesh.getFaceSmoothingGroups().addAll(new int[mesh.getFaces().size() / mesh.getFaceElementSize()]);
 
-        ScannedModel scannedModel = new ScannedModel(12, 12, 50f);
+        scannedModel = new ScannedModel(12, 12, 50f);
 
         Timer t = new Timer("layersTimer", true);
         t.scheduleAtFixedRate(new TimerTask() {
@@ -179,7 +182,7 @@ public class MainWindow implements Initializable {
                     scannedModel.addLayer(data);
                 });
             }
-        }, 1000, 2000);
+        }, 1000, 200);
 
         MeshView mv = new MeshView(scannedModel.mesh());
         // mv.setDrawMode(DrawMode.LINE);
@@ -259,7 +262,10 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void clicked() {
-        boolean has3d = Platform.isSupported(ConditionalFeature.SCENE3D);
-        label.setText("3D support: " + has3d);
+        try {
+            scannedModel.saveToObjFile(Paths.get("dummy.obj"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
