@@ -5,8 +5,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.*;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -50,7 +53,7 @@ public class MainWindow implements Initializable {
     private BorderPane mainWindow;
 
     @FXML
-    private StackPane display3D;
+    private SplitPane splitPane;
 
     ScannedModel scannedModel;
 
@@ -77,22 +80,25 @@ public class MainWindow implements Initializable {
             }
         }, 1000, 200);
 
-        AxisMarker am = new AxisMarker();
-        am.scale(15);
+        AxisMarker axisMarker = new AxisMarker();
+        axisMarker.scale(5);
+        axisMarker.reverseY();
 
         Group model = new Group();
-        model.getChildren().add(new Box(600, 5, 600));
+        model.getChildren().add(new Box(800, 1, 800));
         model.getChildren().add(scannedModel.scannedModel());
-        model.getChildren().add(am);
+        model.getChildren().add(axisMarker);
         model.getTransforms().add(new Scale(1, -1, 1));
 
 
         Group sceneGroup = new Group();
-        sceneGroup.getChildren().addAll(model, am);
+        sceneGroup.getChildren().addAll(model, axisMarker);
 
+        Pane subsceneParent = new Pane();
         PreviewSubscene d3Scene = new PreviewSubscene(sceneGroup, 800, 640);
-
-        display3D.getChildren().add(d3Scene);
+        d3Scene.setManaged(false);
+        subsceneParent.getChildren().add(d3Scene);
+        splitPane.getItems().addFirst(subsceneParent);
     }
 
     @FXML

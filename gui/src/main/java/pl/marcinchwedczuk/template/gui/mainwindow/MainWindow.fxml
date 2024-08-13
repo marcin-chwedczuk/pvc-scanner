@@ -23,7 +23,9 @@
     </top>
 
     <center>
-        <StackPane fx:id="display3D" />
+        <SplitPane fx:id="splitPane">
+            <TextArea editable="false" />
+        </SplitPane>
     </center>
 
     <bottom>
