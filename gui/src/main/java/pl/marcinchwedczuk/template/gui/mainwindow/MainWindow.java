@@ -1,18 +1,13 @@
 package pl.marcinchwedczuk.template.gui.mainwindow;
 
-import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Point3D;
 import javafx.scene.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
@@ -20,12 +15,8 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import pl.marcinchwedczuk.template.domain.Util;
-import pl.marcinchwedczuk.template.gui.mainwindow.PointsArray2D.PointRef;
-import pl.marcinchwedczuk.template.gui.mainwindow.TextureArray2D.TextureRef;
 
 import java.io.IOException;
-import java.io.SerializablePermission;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -56,13 +47,7 @@ public class MainWindow implements Initializable {
 
 
     @FXML
-    private VBox mainWindow;
-
-    @FXML
-    private Label label;
-
-    @FXML
-    private Slider rotateSlider;
+    private BorderPane mainWindow;
 
     @FXML
     private StackPane display3D;
@@ -71,52 +56,33 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        label.setText(Util.quote("Hello, world!"));
-
         scannedModel = new ScannedModel(12, 12, 50f);
 
         Timer t = new Timer("layersTimer", true);
         t.scheduleAtFixedRate(new TimerTask() {
-            private int layer = 0;
+            private int points = 0;
 
             @Override
             public void run() {
-                if (layer >= 12) {
+                if (points >= scannedModel.angles() * scannedModel.layers()) {
                     this.cancel();
                     return;
                 }
-                layer++;
+                points++;
 
                 Platform.runLater(() -> {
-                    float[] data = { 400, 300, 500, 405, 234, 554,  435, 444, 334, 543, 343, 300 };
                     Random r = new Random();
-                    for (int i = 0; i < data.length; i++) {
-                        data[i] -= r.nextFloat() * 50;
-                    }
-
-                    scannedModel.addLayer(data);
+                    scannedModel.addScanPoint(r.nextFloat()*70 + 400);
                 });
             }
         }, 1000, 200);
-
-        MeshView mv = new MeshView(scannedModel.mesh());
-        // mv.setDrawMode(DrawMode.LINE);
-        mv.setCullFace(CullFace.NONE);
-        Image diffuseMap = new Image(MainWindow.class.getResource("abc.jpg").toExternalForm());
-        PhongMaterial earthMaterial = new PhongMaterial();
-        earthMaterial.setDiffuseMap(diffuseMap);
-        // earthMaterial.setDiffuseColor(Color.RED);
-        mv.setMaterial(earthMaterial);
-
 
         AxisMarker am = new AxisMarker();
         am.scale(15);
 
         Group model = new Group();
-        // TODO: Move model slightly above Box
         model.getChildren().add(new Box(600, 5, 600));
-        model.getChildren().add(mv);
-        model.getChildren().add(scannedModel.debug);
+        model.getChildren().add(scannedModel.scannedModel());
         model.getChildren().add(am);
         model.getTransforms().add(new Scale(1, -1, 1));
 
