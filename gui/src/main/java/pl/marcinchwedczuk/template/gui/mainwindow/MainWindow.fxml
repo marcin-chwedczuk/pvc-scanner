@@ -5,6 +5,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Pane?>
 <BorderPane minHeight="640" minWidth="800"
             styleClass="mainWindow" stylesheets="@MainWindow.css"
             xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/"
@@ -13,11 +16,58 @@
     <top>
         <VBox>
             <ToolBar>
-                <Button>Save result...</Button>
+
+                <Button>
+                    <graphic>
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@document-save.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+
                 <Separator orientation="VERTICAL" />
-                <Label>Arduino port:</Label>
+                <Label>Serial port:</Label>
                 <ComboBox fx:id="serialPortComboBox" />
-                <Button>Start scan</Button>
+                <Button onAction="#refreshSerialPorts">
+                    <graphic>
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@view-refresh.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Label>Layers:</Label>
+                <ComboBox fx:id="layersComboBox" />
+                <Label>Angles:</Label>
+                <ComboBox fx:id="anglesComboBox" />
+                <Button onAction="#startScan">
+                    <graphic>
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@camera-video.png" />
+                        </ImageView>
+                    </graphic>
+                    Start
+                </Button>
+                <Button disable="true" onAction="#stopScan">
+                    <graphic>
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@process-stop.png" />
+                        </ImageView>
+                    </graphic>
+                    Stop
+                </Button>
+                <Separator orientation="VERTICAL" />
+                <Label>Progress</Label>
+                <ProgressBar fx:id="progressBar" progress="0" />
+                <Separator orientation="VERTICAL" />
+                <Button onAction="#closeApp">
+                    <graphic>
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@system-restart.png" />
+                        </ImageView>
+                    </graphic>
+                    Exit
+                </Button>
             </ToolBar>
         </VBox>
     </top>
@@ -30,6 +80,8 @@
 
     <bottom>
         <HBox>
+            <Pane minWidth="20" />
+            <Separator orientation="VERTICAL" />
             <Label>Ready</Label>
             <Separator orientation="VERTICAL" />
         </HBox>

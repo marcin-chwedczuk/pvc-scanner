@@ -3,6 +3,7 @@ package pl.marcinchwedczuk.template.gui.mainwindow;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -136,5 +137,21 @@ public class MainWindow implements Initializable {
 
     private void handleSerialException(Exception e) {
         logTextArea.appendText("ERROR " + e.getClass() + ": " + e.getMessage());
+    }
+
+    public void refreshSerialPorts(ActionEvent event) {
+
+    }
+
+    public void startScan(ActionEvent event) {
+
+    }
+
+    public void stopScan(ActionEvent event) {
+
+    }
+
+    public void closeApp(ActionEvent event) {
+        Platform.exit();
     }
 }
