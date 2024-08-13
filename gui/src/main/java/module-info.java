@@ -3,6 +3,7 @@ module pl.marcinchwedczuk.template.gui {
 
     requires javafx.controls;
     requires javafx.fxml;
+    requires com.fazecast.jSerialComm;
 
     exports pl.marcinchwedczuk.template.gui;
     exports pl.marcinchwedczuk.template.gui.mainwindow;

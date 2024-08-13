@@ -14,6 +14,8 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        System.setProperty("fazecast.jSerialComm.appid", "pvc_scanner");
+
         launch();
     }
 }

@@ -1,11 +1,15 @@
 package pl.marcinchwedczuk.template.gui.mainwindow;
 
+import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.*;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
@@ -18,6 +22,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import pl.marcinchwedczuk.template.gui.mainwindow.SerialInterface.GetSerialPorts;
 
 import java.io.IOException;
 import java.net.URL;
@@ -55,12 +60,23 @@ public class MainWindow implements Initializable {
     @FXML
     private SplitPane splitPane;
 
+    @FXML
+    private TextArea logTextArea;
+
+    @FXML
+    private ComboBox<SerialPort> serialPortComboBox;
+
     ScannedModel scannedModel;
+    SerialInterface serialInterface;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        serialInterface = new SerialInterface();
+        serialInterface.start();
+
         scannedModel = new ScannedModel(12, 12, 50f);
 
+        /*
         Timer t = new Timer("layersTimer", true);
         t.scheduleAtFixedRate(new TimerTask() {
             private int points = 0;
@@ -79,6 +95,7 @@ public class MainWindow implements Initializable {
                 });
             }
         }, 1000, 200);
+         */
 
         AxisMarker axisMarker = new AxisMarker();
         axisMarker.scale(5);
@@ -99,6 +116,13 @@ public class MainWindow implements Initializable {
         d3Scene.setManaged(false);
         subsceneParent.getChildren().add(d3Scene);
         splitPane.getItems().addFirst(subsceneParent);
+
+
+        serialInterface.sent(new GetSerialPorts()
+                .setOnSuccess(ports -> {
+                    serialPortComboBox.setItems(FXCollections.observableArrayList(ports));
+                })
+                .setOnFailure(this::handleSerialException));
     }
 
     @FXML
@@ -108,5 +132,9 @@ public class MainWindow implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void handleSerialException(Exception e) {
+        logTextArea.appendText("ERROR " + e.getClass() + ": " + e.getMessage());
     }
 }

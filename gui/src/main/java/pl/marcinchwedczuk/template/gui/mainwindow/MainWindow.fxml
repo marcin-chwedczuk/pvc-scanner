@@ -15,16 +15,16 @@
             <ToolBar>
                 <Button>Save result...</Button>
                 <Separator orientation="VERTICAL" />
-                <Button>Start scan</Button>
                 <Label>Arduino port:</Label>
-                <ComboBox />
+                <ComboBox fx:id="serialPortComboBox" />
+                <Button>Start scan</Button>
             </ToolBar>
         </VBox>
     </top>
 
     <center>
         <SplitPane fx:id="splitPane">
-            <TextArea editable="false" />
+            <TextArea editable="false" fx:id="logTextArea" />
         </SplitPane>
     </center>
 
