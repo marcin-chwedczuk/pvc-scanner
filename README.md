@@ -1,60 +1,34 @@
-# JavaFX Opinionated Application Template
+# An attempt to create PVC Figures scanner using Arduino and ultrasonic sensor
 
-![Build Status](https://github.com/marcin-chwedczuk/javafx-template/actions/workflows/ci.yaml/badge.svg)
+I created this project as a PoC to test if it is possible to create a PCV figures scanner using Arduino.
+The ultrasonic sensor turned out to be a bad choice and the results where pretty bad.
+I plan to switch to a laser class 1 sensor (eye safe that is) and try again.
+Most of the work went not to the building of the hardware but to the software.
 
-* Created for JDK 17+, with Java 9 modules support
-* Multi-module Maven project by default
-* Sass used instead of CSS
-* assertJ and jUnit 5 used for unit testing
-* TestFX used for integration testing
-* Example GitHub action that builds the project and runs integration tests in headless mode
+The application:
+![Application Main Window](./pictures/app1.png)
 
-### How to run application
+The hardware:
+![Pic 1](./pictures/photo1.jpeg)
+![Pic 2](./pictures/photo2.jpeg)
+![Pic 3](./pictures/photo3.jpeg)
+![Pic 4](./pictures/photo4.jpeg)
+
+The hardware consists of ultrasonic sensor and 3 servos. Two of the servos where modded to a continuous operation (360 servos).
+I made some parts out of LEGO bricks. Since this is PoC, the hardware is only so so, I plan to improve it when I find a suitable
+working distance sensor.
+
+The software was made using JavaFX framework.
+How to build and run the app:
 ```
+# Build the app
+./mvnw clean install
+
+# Run the app
 ./mvnw javafx:run -pl gui
+
+# Run in the debug mode (waits for the debugger)
+./mvnw javafx:run -pl gui -Pdebug
 ```
 
-### How to rebuild `.css` files from `.scss`
-```
-./mvnw nl.geodienstencentrum.maven:sass-maven-plugin:update-stylesheets -pl gui
-```
-
-### How to watch for SCSS changes and regenerate them when they change
-```
-fswatch --exclude='.*' --include='.*[.]scss$' --print0 . | while read -d "" event; do
-    ./mvnw nl.geodienstencentrum.maven:sass-maven-plugin:update-stylesheets -pl gui 
-done
-```
-You need to install `fswatch` command for this to work.
-
-### How to generate `jlink` image
-```
-./mvnw javafx:jlink -pl gui 
-```
-You can now send `./gui/target/gui.zip` to your friends :tada:
-
-### How to run integration tests (TestFX)
-```
-./mvnw verify -Dskip.integration.tests=false -Dskip.unit.tests=true
-```
-
-### How to run single integration test
-```
-./mvnw clean verify -Dskip.integration.tests=false -Dskip.unit.tests=true \
-    -pl gui -Dit.test=MainWindowIT
-```
-
-### How to run integration tests in the headless mode
-```
-_JAVA_OPTIONS="-Djava.awt.headless=true \
--Dtestfx.robot=glass \
--Dtestfx.headless=true \
--Dprism.order=sw \
--Dprism.verbose=true" ./mvnw verify -Dskip.integration.tests=false -pl gui 
-```
-
-On macOS you must allow IntelliJ or the terminal app that you are using,
-to "take over your computer":
-![macOS settings needed for IT](docs/macOS-it-perm.png)
-
-
+This app is using `jSerialComm` library for serial communication with Arduino.
