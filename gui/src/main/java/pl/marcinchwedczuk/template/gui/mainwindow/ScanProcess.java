@@ -74,7 +74,7 @@ public class ScanProcess {
         isScanCompleted.set(false);
         isScanning.set(true);
 
-        this.scannedModel = new ScannedModel(angles.get(), layers.get(), 10.0f);
+        this.scannedModel = new ScannedModel(angles.get(), layers.get(), 50.0f);
         goTo(ScanWorkflow.START);
         return scannedModel;
     }
@@ -177,7 +177,7 @@ public class ScanProcess {
                                     scanProgress.set(100);
                                     goTo(ScanWorkflow.CLOSE_PORT);
                                 } else {
-                                    scanProgress.set((int)(100.0 * (currentAngle + 1) * (currentLayer + 1) / (scannedModel.angles() * scannedModel.layers())));
+                                    scanProgress.set((int)(100 * ((float)(currentLayer*scannedModel.angles() + currentAngle) / (scannedModel.angles() * scannedModel.layers()))));
                                     goTo(ScanWorkflow.SCAN_SET_ANGLE);
                                 }
                             } else {
