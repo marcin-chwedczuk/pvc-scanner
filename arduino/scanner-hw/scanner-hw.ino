@@ -51,20 +51,15 @@ bool parseSimpleCommand(const char* text, const char* pattern) {
   return parseCommand(text, pattern, NULL);
 }
 
-void sendOK(const char* msg) {
-  Serial.print("OK ");
-  Serial.println(msg);
-}
-
-void sendError(const char* msg) {
-  Serial.print("ERROR ");
-  Serial.print(msg);
-}
-
 void setup() {
   // put your setup code here, to run once:
+
+  // Low baud rate since we have 3 servos generating electromagnetic noise...
   Serial.begin(9600);
-  Serial.println("Initialized");
+
+  // Light on the LED so that we know that we are setup
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, 0);
 }
 
 #define SERIAL_BUFFER_SIZE 128
@@ -82,8 +77,7 @@ void loop() {
   if (parseSimpleCommand(serialBuffer, "SCAN")) {
     int fake = 300 + (int)(millis() % 100);
     Serial.print("OK distance = ");
-    Serial.print(fake);
-    Serial.println("."); 
+    Serial.println(fake*10);
   } else if (parseCommand(serialBuffer, "ANGLE $", &arg)) {
     Serial.print("OK angle set to ");
     Serial.print(arg);
@@ -93,14 +87,18 @@ void loop() {
     Serial.print(arg);
     Serial.println("."); 
   } else if (parseSimpleCommand(serialBuffer, "DESCRIBE")) {
-    sendOK("PCV Scanner 1.0");
+    Serial.println("OK PCV Scanner 1.0");
   } else if (parseSimpleCommand(serialBuffer, "RESET")) {
-    sendOK("");
+    digitalWrite(LED_BUILTIN, 1);
+    Serial.println("OK");
   } else {
     Serial.print("ERROR Unknown command '");
     Serial.print(serialBuffer);
     Serial.println("'");
   }
+
+  Serial.flush();
+  delayMicroseconds(300);
 }
 
 

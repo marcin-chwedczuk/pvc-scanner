@@ -1,6 +1,8 @@
 package pl.marcinchwedczuk.template.gui.mainwindow;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -95,7 +97,11 @@ public class MainWindow implements Initializable {
                     l.stream().map(SerialPortItem::new).toList())));
         scanProcess.serialPort.bind(serialPortComboBox.getSelectionModel().selectedItemProperty().map(SerialPortItem::serialPort));
 
-        logTextArea.textProperty().bind(scanProcess.debugLogs);
+        scanProcess.debugLogs.addListener(observable -> {
+            // Binding results in text not scrolling to the bottom
+            logTextArea.setText(scanProcess.debugLogs.get());
+            logTextArea.setScrollTop(Double.MAX_VALUE);
+        });
 
         layersComboBox.setItems(FXCollections.observableArrayList(5, 10, 15, 20, 25, 50));
         layersComboBox.getSelectionModel().selectFirst();

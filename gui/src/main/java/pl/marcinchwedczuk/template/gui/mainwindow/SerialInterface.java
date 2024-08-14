@@ -88,6 +88,13 @@ public class SerialInterface {
             this.atExit = requireNonNull(atExit);
             return this;
         }
+
+        protected void sleep(long millis) {
+            try { Thread.sleep(millis); }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     public static class GetSerialPorts extends Message<List<SerialPort>> {
@@ -115,8 +122,15 @@ public class SerialInterface {
         @Override
         SerialPort innerExecute(SerialPortLogger logger) {
             if (port.openPort()) {
-                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, TIMEOUT, TIMEOUT);
+                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING, TIMEOUT, TIMEOUT);
+                port.setComPortParameters(9600, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+                port.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+
                 logger.logEvent("Port open.");
+
+                // Opening the port resets Arduino, we need to give it some time to initialize
+                sleep(2000);
+
                 return port;
             }
 
@@ -133,6 +147,7 @@ public class SerialInterface {
 
         @Override
         SerialPort innerExecute(SerialPortLogger logger) {
+            logger.logEvent("Closing port.");
             port.closePort();
             return port;
         }
@@ -150,7 +165,7 @@ public class SerialInterface {
         @Override
         String innerExecute(SerialPortLogger logger) {
             String msg = message;
-            if (!message.endsWith("\n")) {
+            if (!msg.endsWith("\n")) {
                 msg += "\n";
             }
 
@@ -159,17 +174,23 @@ public class SerialInterface {
             int result = port.writeBytes(bytes, bytes.length);
             if (result == -1) throw new RuntimeException("Write to serial port failed.");
 
-            StringBuilder sb = new StringBuilder();
+            port.flushIOBuffers();
 
+            StringBuilder sb = new StringBuilder();
             byte[] singleChar = new byte[1];
             do {
                 if (port.readBytes(singleChar, 1) != 1) {
                     throw new RuntimeException("Reading from serial port failed.");
                 }
-                sb.append((char) singleChar[0]);
+
+                // Do not include line endings
+                if (singleChar[0] != '\r' && singleChar[0] != '\n') {
+                    sb.append((char) singleChar[0]);
+                }
             } while (singleChar[0] != '\n');
 
-            logger.logRecv(message);
+            logger.logRecv(sb.toString());
+
             return sb.toString();
         }
     }

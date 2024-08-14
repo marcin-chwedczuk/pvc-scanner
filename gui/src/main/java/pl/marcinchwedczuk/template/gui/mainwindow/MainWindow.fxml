@@ -74,7 +74,7 @@
 
     <center>
         <SplitPane fx:id="splitPane">
-            <TextArea editable="false" fx:id="logTextArea" />
+            <TextArea editable="false" fx:id="logTextArea" styleClass="log-window" />
         </SplitPane>
     </center>
 

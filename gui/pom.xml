@@ -23,6 +23,8 @@
             --add-opens pl.marcinchwedczuk.template.gui/pl.marcinchwedczuk.template.gui=ALL-UNNAMED
             --add-opens pl.marcinchwedczuk.template.gui/pl.marcinchwedczuk.template.gui.mainwindow=ALL-UNNAMED
         </extra-jvm-options-when-running-tests>
+
+        <debug-profile-extra-jvm-arg />
     </properties>
 
     <dependencies>
@@ -44,7 +46,7 @@
         <dependency>
             <groupId>com.fazecast</groupId>
             <artifactId>jSerialComm</artifactId>
-            <version>[2.0.0,3.0.0)</version>
+            <version>2.11.0</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -176,6 +178,7 @@
                         <!--
                         <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4444</option>
                         -->
+                        <option>${debug-profile-extra-jvm-arg}</option>
                     </options>
                     <stripDebug>false</stripDebug>
                     <noHeaderFiles>true</noHeaderFiles>
@@ -187,4 +190,15 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>debug</id>
+            <properties>
+                <debug-profile-extra-jvm-arg>
+                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=4444
+                </debug-profile-extra-jvm-arg>
+            </properties>
+        </profile>
+    </profiles>
 </project>
