@@ -135,7 +135,7 @@ public class ScanProcess {
             }
             case SCAN_SET_ANGLE -> {
                 // We actually scann between [safetyMargin, 180 - safetyMargin]
-                int safetyMarginDegrees = 5;
+                int safetyMarginDegrees = 10;
                 int angleDegrees = (int)Math.round(safetyMarginDegrees + (180.0 - 2*safetyMarginDegrees) * (currentAngle + 1) / scannedModel.angles());
 
                 serialInterface.sent(new SendCommand(serialPort.get(), "ANGLE " + angleDegrees)
