@@ -134,7 +134,7 @@ public class SerialInterface {
                 return port;
             }
 
-            throw new RuntimeException("Opening port failed.");
+            throw new RuntimeException("Opening port failed. Make sure that the port is not used by other apps, including Arduino IDE Serial Monitor.");
         }
     }
 

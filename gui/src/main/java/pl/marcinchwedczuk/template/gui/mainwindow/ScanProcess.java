@@ -112,7 +112,7 @@ public class ScanProcess {
                             if (response.equals("OK PCV Scanner 1.0")) {
                                 goTo(ScanWorkflow.DEVICE_VALIDATED);
                             } else {
-                                goTo(ScanWorkflow.CLOSE_PORT, new RuntimeException("Unrecognized device."));
+                                goTo(ScanWorkflow.CLOSE_PORT, new RuntimeException("Unrecognized device: " + response));
                             }
                         })
                         .setOnFailure(err -> goTo(ScanWorkflow.CLOSE_PORT, err)));
