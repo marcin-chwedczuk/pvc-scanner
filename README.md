@@ -11,8 +11,6 @@ The application:
 The hardware:
 ![Pic 1](./pictures/photo1.jpeg)
 ![Pic 2](./pictures/photo2.jpeg)
-![Pic 3](./pictures/photo3.jpeg)
-![Pic 4](./pictures/photo4.jpeg)
 
 The hardware consists of ultrasonic sensor and 3 servos. Two of the servos where modded to a continuous operation (360 servos).
 I made some parts out of LEGO bricks. Since this is PoC, the hardware is only so so, I plan to improve it when I find a suitable
